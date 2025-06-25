@@ -1,0 +1,980 @@
+{
+	"info": {
+		"_postman_id": "7a1b51da-8cce-4805-86f2-af623d247526",
+		"name": "Reqres.in",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36681629"
+	},
+	"item": [
+		{
+			"name": "passed requests",
+			"item": [
+				{
+					"name": "List users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"// Check that data array exists and is not empty\r",
+									"pm.test(\"Data array exists and is not empty\", function () {\r",
+									"    pm.expect(jsonData.data).to.be.an(\"array\").that.is.not.empty;\r",
+									"});\r",
+									"\r",
+									"// Check pagination fields\r",
+									"pm.test(\"Correct page number\", function () {\r",
+									"    pm.expect(jsonData.page).to.eql(2);\r",
+									"});\r",
+									"pm.test(\"Correct per_page number\", function () {\r",
+									"    pm.expect(jsonData.per_page).to.eql(6);\r",
+									"});\r",
+									"pm.test(\"Correct total number\", function () {\r",
+									"    pm.expect(jsonData.total).to.eql(12);\r",
+									"});\r",
+									"pm.test(\"Correct total_pages number\", function () {\r",
+									"    pm.expect(jsonData.total_pages).to.eql(2);\r",
+									"});\r",
+									"\r",
+									"// Check support section\r",
+									"pm.test(\"Support URL is correct\", function () {\r",
+									"    pm.expect(jsonData.support.url).to.eql(\"https://contentcaddy.io?utm_source=reqres&utm_medium=json&utm_campaign=referral\");\r",
+									"});\r",
+									"pm.test(\"Support text is correct\", function () {\r",
+									"    pm.expect(jsonData.support.text).to.eql(\"Tired of writing endless social media content? Let Content Caddy generate it for you.\");\r",
+									"});\r",
+									"\r",
+									"// Expected users\r",
+									"var expectedUsers = [\r",
+									"    {id: 7, email: \"michael.lawson@reqres.in\", first_name: \"Michael\", last_name: \"Lawson\"},\r",
+									"    {id: 8, email: \"lindsay.ferguson@reqres.in\", first_name: \"Lindsay\", last_name: \"Ferguson\"},\r",
+									"    {id: 9, email: \"tobias.funke@reqres.in\", first_name: \"Tobias\", last_name: \"Funke\"},\r",
+									"    {id: 10, email: \"byron.fields@reqres.in\", first_name: \"Byron\", last_name: \"Fields\"},\r",
+									"    {id: 11, email: \"george.edwards@reqres.in\", first_name: \"George\", last_name: \"Edwards\"},\r",
+									"    {id: 12, email: \"rachel.howell@reqres.in\", first_name: \"Rachel\", last_name: \"Howell\"}\r",
+									"];\r",
+									"\r",
+									"// Pick a random user index\r",
+									"var randomIndex = Math.floor(Math.random() * jsonData.data.length);\r",
+									"var user = jsonData.data[randomIndex];\r",
+									"var expected = expectedUsers.find(u => u.id === user.id);\r",
+									"\r",
+									"pm.test(`Random User ${user.id} - Exists in expected list`, function () {\r",
+									"    pm.expect(expected).to.be.an(\"object\");\r",
+									"});\r",
+									"\r",
+									"if (expected) {\r",
+									"    pm.test(`Random User ${user.id} - Correct email`, function () {\r",
+									"        pm.expect(user.email).to.eql(expected.email);\r",
+									"    });\r",
+									"    pm.test(`Random User ${user.id} - Correct first_name`, function () {\r",
+									"        pm.expect(user.first_name).to.eql(expected.first_name);\r",
+									"    });\r",
+									"    pm.test(`Random User ${user.id} - Correct last_name`, function () {\r",
+									"        pm.expect(user.last_name).to.eql(expected.last_name);\r",
+									"    });\r",
+									"    pm.test(`Random User ${user.id} - Avatar is a valid URL`, function () {\r",
+									"        pm.expect(user.avatar).to.match(/^https:\\/\\/reqres\\.in\\/img\\/faces\\/\\d+-image\\.jpg$/);\r",
+									"    });\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "reqres-free-v1",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users?page=2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Single user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check status code\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"    const jsonData = pm.response.json();\r",
+									"    const userID = pm.environment.get(\"userID\");\r",
+									"\r",
+									"pm.test(\"User ID matches the requested ID\", function () {\r",
+									"    pm.expect(jsonData.data.id).to.eql(userID);\r",
+									"});\r",
+									"// Check response body properties\r",
+									"pm.test(\"Response body has required properties\", function () {\r",
+									"    const requiredUserProps = ['id', 'email', 'first_name', 'last_name', 'avatar'];\r",
+									"    const requiredSupportProps = ['url', 'text'];\r",
+									"\r",
+									"    requiredUserProps.forEach(prop => {\r",
+									"        pm.expect(jsonData.data).to.have.property(prop);\r",
+									"    });\r",
+									"\r",
+									"    requiredSupportProps.forEach(prop => {\r",
+									"        pm.expect(jsonData.support).to.have.property(prop);\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"pm.test(\"email valid format\",function() {\r",
+									"const email = jsonData.data.email;\r",
+									"const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\r",
+									"    pm.expect(email).to.be.a('string').and.to.match(emailRegex);\r",
+									"\r",
+									"});\r",
+									"\r",
+									"pm.test(\"first_name , last_name and email not empty\",function() {\r",
+									"const firstName = jsonData.data.first_name;\r",
+									"const lastName = jsonData.data.last_name;\r",
+									"const email = jsonData.data.email;\r",
+									"\r",
+									"    pm.expect(firstName).to.not.be.empty;\r",
+									"    pm.expect(lastName).to.not.be.empty;\r",
+									"    pm.expect(email).to.not.be.empty;\r",
+									"});\r",
+									"\r",
+									"\r",
+									"// Check response headers\r",
+									"    pm.test(\"Response has required headers\", function () {\r",
+									"    const headers = pm.response.headers;\r",
+									"    const expectedHeaders = {\r",
+									"        'Content-Type': 'application/json',\r",
+									"        'Server': 'cloudflare'\r",
+									"    };\r",
+									"\r",
+									"    Object.keys(expectedHeaders).forEach(header => {\r",
+									"        pm.expect(headers.get(header)).to.include(expectedHeaders[header]);\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const randomValue = Math.floor(Math.random() * 12) + 1 ;\r",
+									"\r",
+									"pm.environment.set(\"userID\", randomValue);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "reqres-free-v1",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users/{{userID}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{userID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Single user not found",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Respnse data is empty\",function(){\r",
+									"    pm.expect(pm.response.json()).to.be.empty;\r",
+									"})"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "reqres-free-v1",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users/23",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"23"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List <resource>",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check status code\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const jsonData = pm.response.json();\r",
+									"////\r",
+									"\r",
+									"const dataArray = jsonData.data;\r",
+									"\r",
+									"// Get random index\r",
+									"const randomIndex = Math.floor(Math.random() * dataArray.length);\r",
+									"// Store index in environment variable\r",
+									"pm.environment.set(\"selectedIndex\", randomIndex);\r",
+									"\r",
+									"// Optionally: store the selected name or id\r",
+									"const selectedItem = dataArray[randomIndex];\r",
+									"pm.environment.set(\"selectedName\", selectedItem.name);\r",
+									"pm.environment.set(\"selectedId\", selectedItem.id);\r",
+									"////\r",
+									"\r",
+									"// Check general pagination properties\r",
+									"pm.test(\"Response has pagination properties\", function () {\r",
+									"    const paginationProps = ['page', 'per_page', 'total', 'total_pages'];\r",
+									"    paginationProps.forEach(prop => {\r",
+									"        pm.expect(jsonData).to.have.property(prop);\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"// Check data array is not empty and has required properties\r",
+									"pm.test(\"Data array has required properties\", function () {\r",
+									"    pm.expect(jsonData.data).to.be.an('array').that.is.not.empty;\r",
+									"\r",
+									"    const requiredProps = ['id', 'name', 'year', 'color', 'pantone_value'];\r",
+									"    jsonData.data.forEach(item => {\r",
+									"        requiredProps.forEach(prop => {\r",
+									"            pm.expect(item).to.have.property(prop);\r",
+									"        });\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"// Check each item has valid color and non-empty name and pantone_value\r",
+									"pm.test(\"Each item has valid color and non-empty name, pantone_value\", function () {\r",
+									"    const hexColorRegex = /^#([0-9A-F]{6})$/i;\r",
+									"\r",
+									"    jsonData.data.forEach(item => {\r",
+									"        pm.expect(item.color).to.match(hexColorRegex);\r",
+									"        pm.expect(item.name).to.be.a('string').and.to.not.be.empty;\r",
+									"        pm.expect(item.pantone_value).to.be.a('string').and.to.not.be.empty;\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"// Check support section\r",
+									"pm.test(\"Support section has required properties\", function () {\r",
+									"    const supportProps = ['url', 'text'];\r",
+									"    supportProps.forEach(prop => {\r",
+									"        pm.expect(jsonData.support).to.have.property(prop);\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"// Check response headers\r",
+									"pm.test(\"Response has required headers\", function () {\r",
+									"    const headers = pm.response.headers;\r",
+									"    const expectedHeaders = {\r",
+									"        'Content-Type': 'application/json',\r",
+									"        'Server': 'cloudflare'\r",
+									"    };\r",
+									"\r",
+									"    Object.keys(expectedHeaders).forEach(header => {\r",
+									"        pm.expect(headers.get(header)).to.include(expectedHeaders[header]);\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check if a specific color exists in the data\", function () {\r",
+									"    const dataArray = jsonData.data;\r",
+									"\r",
+									"    let ceruleanExists = false;\r",
+									"\r",
+									"    for (let i = 0; i < dataArray.length; i++) {    \r",
+									"        if (dataArray[i].name === \"cerulean\") {\r",
+									"            ceruleanExists = true;\r",
+									"            break;\r",
+									"        }\r",
+									"    }\r",
+									"    pm.expect(ceruleanExists).to.be.true;\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "reqres-free-v1",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/unknown",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"unknown"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Single <resource>",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"let expectedName = pm.environment.get(\"selectedName\");\r",
+									"\r",
+									"pm.test(\"Correct name\" , function(){\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.data.name).to.eql(expectedName);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "reqres-free-v1",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/unknown/{{selectedId}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"unknown",
+								"{{selectedId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Single <resource> not found",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Respnse data is empty\",function(){\r",
+									"    pm.expect(pm.response.json()).to.be.empty;\r",
+									"})"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "reqres-free-v1",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/unknown/23",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"unknown",
+								"23"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delayed response",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "reqres-free-v1",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users?delay=3",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							],
+							"query": [
+								{
+									"key": "delay",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "failed requests",
+			"item": [
+				{
+					"name": "Create",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"//wrong response , will add tests when the request passes"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "reqres-free-v1",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"morpheus\",\r\n    \"job\": \"leader\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"//wrong response , will add tests when the request passes"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"morpheus\",\r\n    \"job\": \"zion resident\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update (patch)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"//wrong response , will add tests when the request passes"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"morpheus\",\r\n    \"job\": \"zion resident\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"morpheus\",\r\n    \"job\": \"zion resident\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register - successful",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"eve.holt@reqres.in\",\r\n    \"password\": \"pistol\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": " Register - unsuccessful",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"sydney@fife\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login - successful",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"eve.holt@reqres.in\",\r\n    \"password\": \"cityslicka\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login - unsuccessful",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"peter@klaven\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"// pm.test(\"Response time is less than 1 second\", function () {\r",
+					"//     pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+					"// });\r",
+					"\r",
+					"pm.test(\"Response time is less than 1 second\",function(){\r",
+					"    const currentRequestName = pm.info.requestName;\r",
+					"\r",
+					"    //skip the test for specific request(s)\r",
+					"    if (currentRequestName === \"Delayed response\"){\r",
+					"        console.log(\"Skipping 'response time is less than 1 second' test for this reques.\");\r",
+					"        return;\r",
+					"    }\r",
+					"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+					"});\r",
+					"\r",
+					""
+				]
+			}
+		}
+	]
+}
